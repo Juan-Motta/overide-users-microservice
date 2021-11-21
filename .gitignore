@@ -1,0 +1,6 @@
+venv
+.env
+/users_microservice/static/
+users/migrations/*
+!users/migrations/__init__.py
+users_microservice/*.sqlite3
