@@ -19,20 +19,23 @@ Microservicio de manejo de usuarios y autenticación de la applicacion OVERIDE, 
 
 El proyecto se encuentra corriendo bajo un host de docker, es posible utilizar el proyecto de manera local utilizando python o utilizando docker
 
-<hr>
 
 ### Creacion de variables de entorno
-En la raiz del proyecto se debe crear un archivo con el nombre **.env** con la siguiente informacion
+En la raiz del proyecto se debe crear un archivo con el nombre **.env**, este archivo con la siguiente informacion
 
 ```
 DEBUG=<Boolean: False o True>
+SECRET_KEY=<secret key, puede ser cualquier string>
 DB_NAME=<nombre db>
 DB_USER=<usuario de la db>
 DB_PASSWORD=<contraseña de la db>
 DB_HOST=<host de la db>
 DB_PORT=<puerto de la db>
-SECRET_KEY=<secret key, puede ser cualquier string>
 ```
+
+Si se desea trabajar en un entorno de desarrollo, se debe actualizar la variable DEBUG a True. 
+**En el entorno de desarrollo la informacion de la base de datos no tiene relevancia ya que se utiliza una base de datos sqlite**
+
 
 La informacion suministrada no debe tener comillas o espacios
 
@@ -72,7 +75,13 @@ python manage.py createsuperuser
 ```console
 python manage.py runserver
 ```
-<hr>
+
+Para un entorno de produccion se debe utilizar adicionalmente el siguiente comando antes de iniciar el servidor
+
+#### 7️⃣ Generacion de archivos estaticos (solo produccion)
+```console
+python manage.py collectstatic
+```
 
 ### Configuracion via Docker
 
@@ -95,7 +104,6 @@ Para cerrar el servidor una vez inicializado se debe usar el comando:
 ```console
 docker-compose down -v
 ```
-<hr>
 
 ## ⚙️ API
 
@@ -104,13 +112,13 @@ Un usuario solo podra obtener, modificar y eliminar su propia información, solo
 #### 🟢 Obtener usuario
 Devuelve el usuario que corresponda al id especificado, si no existe devuelve un mensaje de error
 ```
-http://localhost:8000/api/users/<int:id>
+http://localhost:8000/api/users/id/<int:id>
 ```
 
 Ejemplo: 
 
 ```
-http://localhost:8000/api/users/1
+http://localhost:8000/api/users/id/1
 ```
 ```json
 {
@@ -131,19 +139,19 @@ http://localhost:8000/api/users/1
 #### 🟢 Obtener usuarios
 Devuelve una lista con todos los usuarios registrados
 ```
-http://localhost:8000/api/users
+http://localhost:8000/api/users/all
 ```
 
 #### 🟢 Crear usuario
-Crea un usuario con la información suministrada. Id, is_active e is_staff no deben ser suministrados o no se tendran en cuenta.
+Crea un usuario con la información suministrada.
 ```
-http://localhost:8000/api/users/
+http://localhost:8000/api/users/create/
 ```
 
 Ejemplo:
 
 ```
-http://localhost:8000/api/users/
+http://localhost:8000/api/users/create/
 ```
 ```json
 {
@@ -154,30 +162,65 @@ http://localhost:8000/api/users/
     "document": "12345678",
     "birth": "2021-11-15",
     "phone": "12345678",
+    "password": "contraseña",
 }
 ```
 
 #### 🟢 Editar usuario
-Modifica el usuario que corresponda al id suministrado, la información que se debe suministrar corresponde a la misma que la de crear un usuario.
+Modifica el usuario que corresponda al id suministrado.
 ```
-http://localhost:8000/api/users/<int:id>
+http://localhost:8000/api/users/id/<int:id>
+```
+
+Ejemplo:
+
+```
+http://localhost:8000/api/users/id/1
+```
+```json
+{
+    "email": "jhon@example.com",
+    "name": "Jhon",
+    "last_name": "Doe",
+    "document": "12345678",
+    "birth": "2021-11-15",
+    "phone": "12345678",
+}
+```
+
+#### 🟢 Editar contraseña de usuario
+Modifica la contraseña del usuario que corresponda al id suministrado.
+```
+http://localhost:8000/api/users/password/<int:id>
+```
+
+Ejemplo:
+
+```
+http://localhost:8000/api/users/password/1
+```
+```json
+{
+    "password": "contraseña"
+}
 ```
 
 #### 🟢 Eliminar usuario
 Elimina el usuario que corresponda con el id suministrado
 ```
-http://localhost:8000/api/users/<int:id>
+http://localhost:8000/api/users/id/<int:id>
 ```
+
 
 #### 🟢 Obtener token
 Devuelve un par de tokens de acceso si las credenciales de acceso existen en la base de datos. **La duración del access token es de 5 minutos**
 ```
-http://localhost:8000/api/token/
+http://localhost:8000/api/login/
 ```
 
 Ejemplo:
 ```
-http://localhost:8000/api/token/
+http://localhost:8000/api/login/
 ```
 ```json
 {
@@ -189,12 +232,12 @@ http://localhost:8000/api/token/
 #### 🟢 Refrescar token
 Devuelve acces token nuevo si el refresh token suministrado es valido. **La duración del refresh token es de 1 dia**
 ```
-http://localhost:8000/api/token/refresh/
+http://localhost:8000/api/login/refresh/
 ```
 
 Ejemplo:
 ```
-http://localhost:8000/api/token/refresh/
+http://localhost:8000/api/login/refresh/
 ```
 ```json
 {
@@ -221,3 +264,13 @@ http://localhost:8000/api/token/refresh/
 
 * Actualizada seguridad de la API, ahora solo es posible acceder a la informacion del usuario con el id entregado el las cabeceras de la aplicación.
 * Actualizada seguridad de la API, ahora los usuarios con permisos de administrador pueden acceder a la informacion de cualquier usuario.
+
+#### 0.4.0
+
+* Cambiados endpoints de la applicación
+* Cambiada configuracion de los endpoints de la aplicación
+* Actualizados serializadores de la applicación
+
+#### 0.4.1
+
+* Corregido error de django "Could Not Translate Host Name" al correr la imagen de Docker con docker-compose

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from users.models import User
 
 
-class UserDetailSerializer(serializers.ModelSerializer):
+class UserListSerializer(serializers.ModelSerializer):
     """
     A serializer class for converting models instances into JSON files and viceversa used for GET methods.
     """
@@ -18,13 +18,13 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'birth',
             'phone',
             'is_active',
-            'is_staff'
+            'is_staff',
         ]
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.ModelSerializer):
     """
-    A serializer class for converting models instances into JSON files and viceversa used for POST and PUT methods.
+    A serializer class for converting models instances into JSON files and viceversa used for POST method.
     """
     class Meta:
         model = User
@@ -45,6 +45,33 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """
+    A serializer class for converting models instances into JSON files and viceversa used for PUT method.
+    """
+    class Meta:
+        model = User
+        fields = [
+            'email',
+            'name',
+            'last_name',
+            'document',
+            'birth',
+            'phone',
+        ]
+
+
+class UserUpdatePasswordSerializer(serializers.ModelSerializer):
+    """
+    A serializer class for converting models instances into JSON files and viceversa used for PUT method.
+    """
+    class Meta:
+        model = User
+        fields = [
+            'password',
+        ]
 
     # Hash the password when the register is updated
     def update(self, instance, validated_data):
